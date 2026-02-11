@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        body { background: #131112; color: #fff; font-family: 'VT323'; }
+        
+        .atm-frame { 
+            border: 10px solid #333; 
+            background: #000; 
+            padding: 20px; 
+            box-shadow: inset 0 0 50px #444, 0 0 20px #0ff3; 
+        }
+
+        .risk-bar { height: 30px; border: 2px solid white; }
+
+        .balance-display {
+            background: #020202;
+            border: 2px solid #0ff;
+            color: #0ff;
+            text-align: center;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            box-shadow: inset 0 0 10px #0ff;
+        }
+
+        .atm-btn {
+            font-size: 1.5rem;
+        }
+        .heist:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        .list-group-item {
+            pointer-events: none;
+        }
+        .pixel-toast {
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #000;
+        border: 3px solid #0ff;
+        padding: 12px 24px;
+        font-size: 22px;
+        z-index: 9999;
+        opacity: 0;
+        transition: .3s;
+        }
+
+        .pixel-toast.show { opacity: 1; }
+
+        .pixel-toast.success { border-color:#00ff88; color:#00ff88; }
+        .pixel-toast.warning { border-color:#ffc107; color:#ffc107; }
+        .pixel-toast.danger { border-color:#ff3c3c; color:#ff3c3c; }
+
+
+    </style>
+</head>
+
+<body>
+    <div id="modalToast" class="pixel-toast"></div>
+
+    <!-- ATM HACK MODAL -->
+    <div class="modal fade" id="hackModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-black text-info border border-info">
+
+        <div class="modal-header border-info">
+            <h4 class="modal-title">ATM SECURITY BYPASS</h4>
+        </div>
+
+        <div class="modal-body text-center">
+
+            <!-- TARGET CODE -->
+            <div class="mb-3">
+            <label class="text-info">SECURITY CODE</label>
+            <h2 id="targetCode" class="text-warning"></h2>
+            </div>
+
+            <!-- INPUT DISPLAY -->
+            <input type="text" id="codeInput" class="form-control text-center balance-display mb-4" readonly>
+
+            <!-- KEYPAD -->
+            <div class="row g-2">
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(1)">1</button></div>
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(2)">2</button></div>
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(3)">3</button></div>
+
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(4)">4</button></div>
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(5)">5</button></div>
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(6)">6</button></div>
+
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(7)">7</button></div>
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(8)">8</button></div>
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(9)">9</button></div>
+
+            <div class="col-4"><button class="btn btn-warning w-100" onclick="clearCode()">CLR</button></div>
+            <div class="col-4"><button class="btn btn-outline-info w-100" onclick="pressKey(0)">0</button></div>
+            <div class="col-4"><button class="btn btn-danger w-100" onclick="backspace()"><i class="bi bi-backspace"></i></button></div>
+            </div>
+
+            <button class="btn btn-success w-100 mt-4" onclick="verifyCode()">
+            <i class="bi bi-cpu"></i> HACK ATM
+            </button>
+
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="container py-5 text-center">
+        <div class="atm-frame mx-auto" style="max-width: 500px;">
+            
+            <h2 class="text-info">ATM HACK: WITHDRAWAL</h2>
+
+            <!-- BALANCE DISPLAY -->
+            <div class="my-4">
+                <label class="mb-2 text-info">TARGET EXTRACTION</label>
+                <input type="text" id="balanceBox" class="form-control balance-display" readonly>
+                
+                <div class="d-flex gap-3 mt-3">
+                    <button class="btn btn-secondary w-50 atm-btn" onclick="decrement()">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+
+                    <button class="btn btn-info w-50 atm-btn" onclick="increment()">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HEIST OPTIONS -->
+            <div class="list-group my-4">
+                <label class="list-group-item bg-dark text-white border-secondary">
+                    <input type="checkbox" class="me-2 heist" onchange="updateRisk()" value="20" data-amount="50000">
+                    ₱50K (Fast Track)
+                </label>
+
+                <label class="list-group-item bg-dark text-white border-secondary">
+                    <input type="checkbox" class="me-2 heist" onchange="updateRisk()" value="40" data-amount="100000">
+                    ₱100K (Fake Passport)
+                </label>
+
+                <label class="list-group-item bg-dark text-white border-secondary">
+                    <input type="checkbox" class="me-2 heist" onchange="updateRisk()" value="60" data-amount="200000">
+                    ₱200K (VIP Access)
+                </label>
+            </div>
+
+            <!-- RISK BAR -->
+            <div class="risk-bar mb-4">
+                <div id="risk" class="bg-success h-100" style="width: 0%"></div>
+            </div>
+
+            <button class="btn btn-primary w-100" id="btn" disabled onclick="openHackModal()">
+                KUNIN ANG PERA AT TAKBO
+            </button>
+
+
+        </div>
+    </div>
+
+    <script>
+    /* CONFIG */
+    let balance = 10000;
+    const MIN = 10000;
+    const MAX = 200000;
+    const STEP = 10000;
+
+    /* INIT */
+    updateDisplay();
+    syncCheckboxes();
+
+    /* FORMAT MONEY */
+    function formatMoney(val){
+        return "₱" + val.toLocaleString();
+    }
+
+    /* UPDATE DISPLAY */
+    function updateDisplay(){
+        document.getElementById('balanceBox').value = formatMoney(balance);
+    }
+
+    /* INCREMENT */
+    function increment(){
+        if(balance + STEP <= MAX){
+            balance += STEP;
+            updateDisplay();
+            syncCheckboxes();
+            updateRisk();
+        }
+    }
+
+    /* DECREMENT */
+    function decrement(){
+        if(balance - STEP >= MIN){
+            balance -= STEP;
+            updateDisplay();
+            syncCheckboxes();
+            updateRisk();
+        }
+    }
+
+    /* AUTO CHECK BASED ON BALANCE */
+    function syncCheckboxes(){
+        document.querySelectorAll('.heist').forEach(cb=>{
+            const required = parseInt(cb.dataset.amount);
+            cb.checked = balance >= required;
+        });
+    }
+
+    /* RISK SYSTEM */
+    function updateRisk() {
+        let risk = 0, count = 0;
+
+        document.querySelectorAll('.heist:checked').forEach(c => {
+            risk += parseInt(c.value);
+            count++;
+        });
+
+        document.getElementById('risk').style.width = Math.min(risk, 100) + '%';
+        document.getElementById('btn').disabled = count < 1;
+    }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    let generatedCode = "";
+    let userCode = "";
+    let modal;
+
+    /* OPEN MODAL */
+    function openHackModal(){
+    modal = new bootstrap.Modal(document.getElementById('hackModal'));
+    generateCode();
+    userCode = "";
+    updateCodeDisplay();
+    modal.show();
+    }
+
+    /* GENERATE RANDOM CODE */
+    function generateCode(){
+    generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+    document.getElementById("targetCode").innerText = generatedCode;
+    }
+
+    /* KEYPAD INPUT */
+    function pressKey(num){
+    if(userCode.length < 4){
+        userCode += num;
+        updateCodeDisplay();
+    }
+    }
+
+    function clearCode(){
+    userCode = "";
+    updateCodeDisplay();
+    }
+
+    function backspace(){
+    userCode = userCode.slice(0,-1);
+    updateCodeDisplay();
+    }
+
+    function updateCodeDisplay(){
+    document.getElementById("codeInput").value = userCode;
+    }
+
+    /* TOAST */
+    function showModalToast(message,type="warning"){
+    const t = document.getElementById("modalToast");
+    t.innerHTML = message;
+    t.className = "pixel-toast " + type + " show";
+
+    setTimeout(()=>{
+        t.classList.remove("show");
+    },2000);
+    }
+
+    /* VERIFY */
+    function verifyCode(){
+
+    if(userCode.length < 4){
+        showModalToast("<i class='bi bi-exclamation-triangle-fill me-2'></i>ENTER 4 DIGITS","warning");
+        return;
+    }
+
+    if(userCode !== generatedCode){
+        showModalToast("<i class='bi bi-x-circle-fill me-2'></i>ACCESS DENIED","danger");
+        return;
+    }
+
+    showModalToast("<i class='bi bi-check-circle-fill me-2'></i>NA-HACK NA ANG ATM","success");
+
+    setTimeout(()=>{
+        location.href="level6.html";
+    },1200);
+    }
+    </script>
+
+</body>
+</html>

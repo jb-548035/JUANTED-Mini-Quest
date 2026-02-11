@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body { background: #0d0106; color: white; font-family: 'VT323'; image-rendering: pixelated; }
+        .stat-bar { height: 12px; background: #222; border: 1px solid #444; position: relative; }
+        .progress-pixel { background: #FFCC00; height: 100%; transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card-vehicle { background: #1a1a1a; border: 4px solid #444; transition: 0.3s; position: relative; }
+        .card-vehicle.selected { border-color: #00ffcc; box-shadow: 0 0 20px rgba(0, 255, 204, 0.4); transform: translateY(-5px); }
+        
+        .pixel-icon { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 4px 0px #000); }
+        
+        .btn-plus-minus { background: #333; border: 2px solid #555; color: white; line-height: 1; padding: 0 8px; transition: 0.2s; }
+        .btn-plus-minus:hover { background: #555; border-color: #fff; }
+        .btn-select { font-size: 0.8rem; letter-spacing: 1px; }
+        
+        .counter-label { font-size: 0.9rem; color: #aaa; }
+        .percent-val { color: #00ffcc; font-weight: bold; }
+        /* Pixel Border Styling */
+        .pixel-box {
+            border: 4px solid white;
+            box-shadow: 4px 4px 0px #333;
+            background: rgba(20, 20, 20, 0.9);
+            position: relative;
+        }
+
+        /* Typewriter */
+        .typewriter { overflow: hidden; border-right: .15em solid orange; white-space: nowrap; 
+                      margin: 0 auto; letter-spacing: .15em; animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite; }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: orange; } }
+        .vehicle-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px; /* EVEN spacing */
+        }
+
+        .vehicle-card {
+            background: #111;
+            border: 2px solid #333;
+            padding: 15px;
+            transition: 0.3s ease;
+        }
+        .vehicle-card.selected {
+            border-color: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+        }
+
+        .vehicle-card.selected button {
+            background: #00ff88;
+            color: black;
+            border-color: #00ff88;
+        }
+        .nav-btn {
+            position: fixed;
+            top: 20px;
+            z-index: 999;
+        }
+
+        .nav-btn.left { left: 20px; }
+        .nav-btn.right { right: 20px; }
+
+        .nav-control {
+            font-size: 2rem;
+            background: transparent;
+            border: none;
+            color: white;
+        }
+
+        .nav-control.locked {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* ===== PIXEL TOAST ===== */
+        .pixel-toast {
+            position: fixed;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #111;
+            border: 4px solid #00ffcc;
+            color: #00ffcc;
+            font-family: 'VT323';
+            font-size: 22px;
+            letter-spacing: 2px;
+            padding: 12px 28px;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+
+            /* Pixel Shadow */
+            box-shadow:
+                0 0 0 2px #000,
+                0 0 15px rgba(0,255,204,0.4);
+
+            transition: all 0.35s ease;
+        }
+
+        .pixel-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Error Variant */
+        .pixel-toast.error {
+            border-color: #ff3c3c;
+            color: #ff3c3c;
+            box-shadow:
+                0 0 0 2px #000,
+                0 0 15px rgba(255,60,60,0.4);
+        }
+
+        /* Success Variant */
+        .pixel-toast.success {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        .card-vehicle .btn-select.selected-btn{
+            background:#00ff88;
+            color:black;
+            border-color:#00ff88;
+        }
+
+
+
+    </style>
+</head>
+<body>
+        <div id="pixelToast" class="pixel-toast">
+            <span id="pixelToastText">SYSTEM MESSAGE</span>
+        </div>
+
+        <div class="container py-5">
+                <div class="nav-btn left">
+            <button id="backBtn" class="nav-control">
+                <i class="bi bi-arrow-left-circle"></i>
+            </button>
+        </div>
+
+        <div class="nav-btn right">
+            <button id="nextBtn" class="nav-control locked">
+                <i class="bi bi-arrow-right-circle"></i>
+            </button>
+        </div>
+
+        <h1 class="text-center mb-3">PUMILI NG SASAKYAN</h1>
+        <div class="row g-4 justify-content-center" id="vehicleGrid">
+            <div class="col-lg-4 col-md-6">
+                <div class="card-vehicle p-3 text-center" id="bike">
+                    <img src="/assets/vehicle-1.png" class="pixel-icon" alt="Bike">
+                    <h4 class="text-warning">BIKE</h4>
+                    
+                    <div class="my-2">
+                        <div class="d-flex justify-content-between counter-label mb-1">
+                            <span>SPEED</span> <span class="percent-val" id="bike-speed-val">30%</span>
+                        </div>
+                        <div class="stat-bar"><div class="progress-pixel" id="bike-speed-bar" style="width: 30%"></div></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between counter-label mb-1">
+                            <span>RISK</span> <span class="percent-val text-danger" id="bike-risk-val">10%</span>
+                        </div>
+                        <div class="stat-bar"><div class="progress-pixel bg-danger" id="bike-risk-bar" style="width: 10%"></div></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <button class="btn btn-plus-minus" onclick="adjust('bike', 'minus')">-</button>
+                        <span class="small text-uppercase mt-1">Upgrade</span>
+                        <button class="btn btn-plus-minus" onclick="adjust('bike', 'plus')">+</button>
+                    </div>
+                    
+                    <button class="btn btn-sm btn-outline-light w-100 btn-select" onclick="toggleSelect('bike')">SELECT</button>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card-vehicle p-3 text-center" id="motor">
+                    <img src="/assets/vehicle-2.png" class="pixel-icon" alt="Motor">
+                    <h4 class="text-warning">MOTOR</h4>
+                    
+                    <div class="my-2">
+                        <div class="d-flex justify-content-between counter-label mb-1">
+                            <span>SPEED</span> <span class="percent-val" id="motor-speed-val">70%</span>
+                        </div>
+                        <div class="stat-bar"><div class="progress-pixel" id="motor-speed-bar" style="width: 70%"></div></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between counter-label mb-1">
+                            <span>RISK</span> <span class="percent-val text-danger" id="motor-risk-val">60%</span>
+                        </div>
+                        <div class="stat-bar"><div class="progress-pixel bg-danger" id="motor-risk-bar" style="width: 60%"></div></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <button class="btn btn-plus-minus" onclick="adjust('motor', 'minus')">-</button>
+                        <button class="btn btn-plus-minus" onclick="adjust('motor', 'plus')">+</button>
+                    </div>
+                    
+                    <button class="btn btn-sm btn-outline-light w-100 btn-select" onclick="toggleSelect('motor')">SELECT</button>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card-vehicle p-3 text-center" id="car">
+                    <img src="/assets/vehicle-3.png" class="pixel-icon" alt="Car">
+                    <h4 class="text-warning">CAR</h4>
+                    
+                    <div class="my-2">
+                        <div class="d-flex justify-content-between counter-label mb-1">
+                            <span>SPEED</span> <span class="percent-val" id="car-speed-val">60%</span>
+                        </div>
+                        <div class="stat-bar"><div class="progress-pixel" id="car-speed-bar" style="width: 60%"></div></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between counter-label mb-1">
+                            <span>RISK</span> <span class="percent-val text-danger" id="car-risk-val">40%</span>
+                        </div>
+                        <div class="stat-bar"><div class="progress-pixel bg-danger" id="car-risk-bar" style="width: 40%"></div></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <button class="btn btn-plus-minus" onclick="adjust('car', 'minus')">-</button>
+                        <button class="btn btn-plus-minus" onclick="adjust('car', 'plus')">+</button>
+                    </div>
+                    
+                    <button class="btn btn-sm btn-outline-light w-100 btn-select" onclick="toggleSelect('car')">SELECT</button>
+                </div>
+            </div>
+            <div class="pixel-box p-4 w-100 mt-3 mb-3 d-flex align-items-center">
+                <div class="avatar border-end pe-3 me-3">
+                    <img src="/assets/avatar-3.png" width="80" alt="Juan">
+                </div>
+                <div class="content">
+                    <h4 class="text-warning">JUAN</h4>
+                    <p class="typewriter" id="dialogue">"Piliin ang sasakyan na magpapabilis sa paglalakbay at i-upgrade ang iyong takas para sa mas mataas na tyansa."</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-lg btn-warning px-5 fw-bold" onclick="proceed()">BIYAHE NA!</button>
+        </div>
+    </div>
+
+    <script>
+        // Initial Stats Data
+        const stats = {
+            bike: { speed: 30, risk: 10 },
+            motor: { speed: 70, risk: 60 },
+            car: { speed: 60, risk: 40 },
+            van: { speed: 40, risk: 20 }
+        };
+
+        function toggleSelect(id){
+
+            document.querySelectorAll('.card-vehicle').forEach(card=>{
+                card.classList.remove('selected');
+
+                const btn = card.querySelector('.btn-select');
+                btn.classList.remove('selected-btn');
+                btn.innerText = "SELECT";
+            });
+
+            const selectedCard = document.getElementById(id);
+            selectedCard.classList.add('selected');
+
+            const btn = selectedCard.querySelector('.btn-select');
+            btn.classList.add('selected-btn');
+            btn.innerText = "SELECTED";
+
+            unlockNext();
+
+            // Pixel flicker effect
+            selectedCard.style.opacity = "0.7";
+            setTimeout(()=> selectedCard.style.opacity = "1", 80);
+        }
+
+
+        function adjust(vehicle, action) {
+            const step = 5;
+            if (action === 'plus' && stats[vehicle].speed < 100) {
+                stats[vehicle].speed += step;
+                stats[vehicle].risk += Math.floor(step / 2); // Speeding up increases risk!
+            } else if (action === 'minus' && stats[vehicle].speed > 5) {
+                stats[vehicle].speed -= step;
+                stats[vehicle].risk -= Math.floor(step / 2);
+            }
+
+            // Constraints
+            stats[vehicle].risk = Math.max(0, Math.min(100, stats[vehicle].risk));
+            stats[vehicle].speed = Math.max(0, Math.min(100, stats[vehicle].speed));
+
+            updateUI(vehicle);
+        }
+
+        function updateUI(v) {
+            // Update Progress Bars
+            document.getElementById(`${v}-speed-bar`).style.width = stats[v].speed + '%';
+            document.getElementById(`${v}-risk-bar`).style.width = stats[v].risk + '%';
+            
+            // Update Percentage Labels
+            document.getElementById(`${v}-speed-val`).innerText = stats[v].speed + '%';
+            document.getElementById(`${v}-risk-val`).innerText = stats[v].risk + '%';
+        }
+
+        function proceed() {
+            const selected = document.querySelector('.card-vehicle.selected');
+
+            if (!selected) {
+                showToast("⚠ PUMILI MUNA NG SASAKYAN", "error");
+                return;
+            }
+
+            showToast("✓ MAY SASAKYAN NA TAYO!", "success");
+
+            setTimeout(()=>{
+                location.href = 'level4.html';
+            }, 900);
+        }
+
+        function selectVehicle(btn){
+            document.querySelectorAll('.vehicle-card').forEach(card=>{
+                card.classList.remove('selected');
+                card.querySelector('button').innerText = "SELECT";
+            });
+
+            const card = btn.closest('.vehicle-card');
+            card.classList.add('selected');
+            btn.innerText = "SELECTED";
+        }
+        function unlockNext(){
+            document.getElementById("nextBtn").classList.remove("locked");
+        }
+        function showToast(message, type="error"){
+
+            const toast = document.getElementById("pixelToast");
+            const text = document.getElementById("pixelToastText");
+
+            text.innerText = message;
+
+            toast.classList.remove("error","success");
+            toast.classList.add(type);
+
+            toast.classList.add("show");
+
+            setTimeout(()=>{
+                toast.classList.remove("show");
+            }, 2500);
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background: #000;
+            font-family: 'VT323';
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* ===== SCENE FRAME ===== */
+        .scene-frame {
+            height: 320px;
+            max-width: 900px;
+            margin: auto;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* ===== TERMINAL PORTRAIT CARDS ===== */
+        .terminal-card {
+            border: 4px solid white;
+            height: 260px;
+            width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .terminal-card:hover {
+            background: white;
+            color: black;
+            transform: translateY(-5px);
+        }
+
+        /* ===== RESULT SCREEN ===== */
+        .result {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        /* ===== PIXEL BOX ===== */
+        .pixel-box {
+            border: 4px solid white;
+            box-shadow: 4px 4px 0px #333;
+            background: rgba(20, 20, 20, .9);
+        }
+
+        /* ===== DIALOGUE BOX ===== */
+        .dialogue-box {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* ===== TYPEWRITER ===== */
+        .typewriter {
+            overflow: hidden;
+            border-right: .15em solid orange;
+            white-space: nowrap;
+            letter-spacing: .15em;
+            animation: typing 3.5s steps(40, end), blink .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        @keyframes blink {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: orange
+            }
+        }
+
+        /* ===== REPLAY BUTTON ===== */
+        .replay-btn {
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            background: transparent;
+            font-size: 24px;
+            letter-spacing: 2px;
+            padding: 14px 35px;
+            transition: .3s;
+        }
+
+        .replay-btn:hover {
+            background: #00ff88;
+            color: black;
+            box-shadow: 0 0 15px #00ff88;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-5">
+
+        <!-- TITLE -->
+        <h1 class="text-center mb-1">PUMILI NG TERMINAL</h1>
+
+        <!-- SCENE -->
+        <div class="scene-frame pixel-box mb-3" style="background:url('/assets/image-16.png') center/cover;">
+        </div>
+
+        <!-- TERMINALS -->
+        <div class="row justify-content-center g-4 mb-3">
+
+            <div class="col-auto">
+                <div class="terminal-card" onclick="finish(true)">TERMINAL 1</div>
+            </div>
+
+            <div class="col-auto">
+                <div class="terminal-card" onclick="finish(false)">TERMINAL 2</div>
+            </div>
+
+            <div class="col-auto">
+                <div class="terminal-card" onclick="finish(false)">TERMINAL 3</div>
+            </div>
+
+        </div>
+
+        <!-- DIALOGUE -->
+        <div class="dialogue-box pixel-box p-4 d-flex align-items-center">
+
+            <div class="border-end pe-3 me-3">
+                <img src="/assets/avatar-3.png" width="80">
+            </div>
+
+            <div>
+                <h4 class="text-warning">JUAN</h4>
+                <p class="typewriter">
+                    "Dalawa sa ito ay mga pulis na nakaabang upang ako'y arestuhin."
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div class="result" id="ending">
+
+        <h1 id="endTitle" class="mb-4"></h1>
+
+        <div class="pixel-box p-4 d-flex align-items-center dialogue-box">
+
+            <div class="border-end pe-3 me-3">
+                <img src="/assets/avatar-6.png" width="80">
+            </div>
+
+            <div>
+                <h4 class="text-warning">PULIS</h4>
+                <p id="endText"></p>
+            </div>
+
+        </div>
+
+        <button class="replay-btn mt-5" onclick="location.href='level1.html'">
+            REPLAY QUEST
+        </button>
+
+    </div>
+
+    <script>
+
+        function finish(success) {
+
+            document.querySelector(".container").style.display = "none";
+            document.getElementById("ending").style.display = "flex";
+
+            if (success) {
+                document.getElementById("endTitle").innerText = "NAKALABAS KA NA!";
+                document.getElementById("endText").innerText = "Nakatakas si Juan! Pareho sa mga sindikatong korakot[joke].";
+            }
+            else {
+                document.getElementById("endTitle").innerText = "HULI KA!";
+                document.getElementById("endText").innerText = "Pulis Trap ang Terminal 2. Balik ka ngayon sa Bilibid.";
+                document.getElementById("ending").style.color = "red";
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
