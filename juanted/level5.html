@@ -243,7 +243,36 @@
     userCode = "";
     updateCodeDisplay();
     modal.show();
+    setTimeout(()=>{
+        document.getElementById("codeInput").focus();
+    },300);
     }
+    document.addEventListener("keydown", function(e){
+
+        // Only work when modal is open
+        if(!document.getElementById("hackModal").classList.contains("show")) return;
+
+        // Numbers 0-9
+        if(e.key >= "0" && e.key <= "9"){
+            pressKey(e.key);
+        }
+
+        // Backspace = delete last digit
+        if(e.key === "Backspace"){
+            backspace();
+        }
+
+        // Delete = clear all
+        if(e.key === "Delete"){
+            clearCode();
+        }
+
+        // Enter = verify
+        if(e.key === "Enter"){
+            verifyCode();
+        }
+    });
+
 
     /* GENERATE RANDOM CODE */
     function generateCode(){
@@ -253,11 +282,20 @@
 
     /* KEYPAD INPUT */
     function pressKey(num){
-    if(userCode.length < 4){
-        userCode += num;
-        updateCodeDisplay();
+        if(userCode.length < 4){
+            userCode += num;
+            updateCodeDisplay();
+
+            // Flash button effect
+            document.querySelectorAll(".atm-btn").forEach(btn=>{
+                if(btn.innerText == num){
+                    btn.classList.add("active");
+                    setTimeout(()=>btn.classList.remove("active"),100);
+                }
+            });
+        }
     }
-    }
+
 
     function clearCode(){
     userCode = "";
@@ -288,7 +326,7 @@
     function verifyCode(){
 
     if(userCode.length < 4){
-        showModalToast("<i class='bi bi-exclamation-triangle-fill me-2'></i>ENTER 4 DIGITS","warning");
+        showModalToast("<i class='bi bi-exclamation-triangle-fill me-2'></i>I-TYPE ANG 4 DIGITS","warning");
         return;
     }
 

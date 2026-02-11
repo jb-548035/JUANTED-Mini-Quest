@@ -12,9 +12,10 @@
             background: var(--p-neon);
             border: none;
             color: whitesmoke;
-            padding: 25px 20px;
+            padding: 12 32px;
             transition: 0.3s;
             box-shadow: 5px 5px 0px #008f7a;
+            align-self: center;
         }
         .pixel-box .content {
             text-align: left;
@@ -187,7 +188,7 @@
 
             document.getElementById('continueBtn').classList.remove('locked');
 
-            showToast("✓ DISGUISE SELECTED", "success");
+            showToast("✓ "+type.toUpperCase()+" SELECTED", "success");
         }
 
         function unlockNext(){
